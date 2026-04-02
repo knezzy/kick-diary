@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kick Diary</title>
+  <meta
+    name="description"
+    content="Kick Diary helps families track baby kicks, spot movement patterns, review insights, sync with iCloud, and share diaries with trusted people."
+  >
+  <style>
+    :root {
+      --bg: #08080b;
+      --panel: rgba(27, 27, 33, 0.94);
+      --panel-strong: #1b1a20;
+      --panel-soft: #23222a;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f5f3f8;
+      --muted: #b8b4bf;
+      --soft: #878294;
+      --pink: #ff5fa8;
+      --pink-soft: #ffbdd8;
+      --lavender: #caaeff;
+      --blue: #a9cfff;
+      --glow: rgba(255, 95, 168, 0.28);
+      --success: #ffc8df;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 139, 189, 0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(202, 174, 255, 0.14), transparent 24%),
+        linear-gradient(180deg, #121118 0%, var(--bg) 38%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .page {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(24px);
+      background: rgba(8, 8, 11, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .topbar-inner {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.7), transparent 28%),
+        linear-gradient(135deg, #ff7ab9, #f79fcf 45%, #f7d9ea);
+      box-shadow: 0 10px 28px rgba(255, 95, 168, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 9px 10px 9px 11px;
+      border-radius: 55% 55% 46% 46%;
+      background: rgba(255, 255, 255, 0.86);
+      transform: rotate(14deg);
+      box-shadow: inset 0 0 22px rgba(255, 170, 206, 0.62);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 7px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #fff1f7, #ffffff, #d9ebff);
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.7);
+    }
+
+    .nav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      padding: 72px 0 40px;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 95, 168, 0.12);
+      color: var(--pink-soft);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      border: 1px solid rgba(255, 95, 168, 0.16);
+    }
+
+    h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(2.8rem, 7vw, 4.9rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.07rem;
+      color: var(--muted);
+      max-width: 60ch;
+    }
+
+    .cta-row {
+      margin-top: 28px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      padding: 14px 18px;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 700;
+      transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      color: #1b0d15;
+      background: linear-gradient(135deg, #ff6bb0, #ffb9d7);
+      box-shadow: 0 14px 34px rgba(255, 95, 168, 0.28);
+    }
+
+    .button-secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+    }
+
+    .hero-meta {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .meta-card,
+    .card,
+    .screenshot-card,
+    .tip-card,
+    .feature-card,
+    .support-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .meta-card {
+      padding: 18px;
+    }
+
+    .meta-card strong {
+      display: block;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+
+    .meta-card span {
+      color: var(--soft);
+      font-size: 0.95rem;
+    }
+
+    .hero-preview {
+      position: relative;
+      min-height: 560px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(24px);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .orb-one {
+      width: 220px;
+      height: 220px;
+      background: rgba(255, 95, 168, 0.28);
+      top: 36px;
+      right: 18px;
+    }
+
+    .orb-two {
+      width: 160px;
+      height: 160px;
+      background: rgba(169, 207, 255, 0.16);
+      bottom: 58px;
+      left: 40px;
+    }
+
+    .phone-stack {
+      position: relative;
+      width: min(100%, 420px);
+      min-height: 560px;
+    }
+
+    .phone {
+      position: absolute;
+      width: 245px;
+      border-radius: 36px;
+      padding: 12px;
+      background: linear-gradient(180deg, #16151b, #09090c);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.44);
+      overflow: hidden;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 104px;
+      height: 24px;
+      border-radius: 0 0 20px 20px;
+      background: #050507;
+      z-index: 2;
+    }
+
+    .phone img {
+      border-radius: 26px;
+      width: 100%;
+    }
+
+    .phone-one {
+      left: 0;
+      top: 100px;
+      transform: rotate(-8deg);
+    }
+
+    .phone-two {
+      right: 0;
+      top: 10px;
+      transform: rotate(8deg);
+    }
+
+    section {
+      padding: 34px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 52ch;
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .screenshot-card {
+      padding: 16px;
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      aspect-ratio: 9 / 19.5;
+      object-fit: cover;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 14px;
+    }
+
+    .screenshot-card h3,
+    .feature-card h3,
+    .tip-card h3,
+    .support-card h3,
+    .support-box h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .screenshot-card p,
+    .feature-card p,
+    .tip-card p,
+    .support-card p,
+    .support-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature-card,
+    .tip-card,
+    .support-card {
+      padding: 20px;
+    }
+
+    .feature-card .tag {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: rgba(255, 95, 168, 0.12);
+      color: var(--pink-soft);
+    }
+
+    .feature-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .tip-ui {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+    }
+
+    .mock-action {
+      width: 66px;
+      height: 66px;
+      flex: 0 0 66px;
+      border-radius: 999px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      font-size: 1.6rem;
+      color: var(--text);
+    }
+
+    .mock-action .badge {
+      position: absolute;
+      right: -2px;
+      bottom: -2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #ff5fa8, #ff9dc8);
+      color: #180c14;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 2px solid #17161d;
+    }
+
+    .mock-action.calendar {
+      font-size: 1.4rem;
+    }
+
+    .tip-ui p {
+      margin: 0;
+    }
+
+    .support-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    .support-box {
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(255, 95, 168, 0.09), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 95, 168, 0.16);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .support-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 20px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--pink-soft);
+    }
+
+    .support-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .support-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .support-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .support-card small {
+      display: block;
+      margin-top: 10px;
+      color: var(--soft);
+    }
+
+    .footer {
+      padding: 30px 0 44px;
+      color: var(--soft);
+      font-size: 0.94rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin-top: 14px;
+    }
+
+    .copy-status {
+      min-height: 20px;
+      margin-top: 12px;
+      color: var(--success);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1060px) {
+      .hero,
+      .support-layout,
+      .feature-grid,
+      .tips-grid,
+      .screenshot-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero {
+        align-items: start;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-inner,
+      .page {
+        width: min(var(--max), calc(100% - 24px));
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .hero,
+      .support-layout,
+      .feature-grid,
+      .tips-grid,
+      .screenshot-grid,
+      .hero-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 40px;
+      }
+
+      .hero-preview {
+        min-height: 500px;
+      }
+
+      .phone-stack {
+        min-height: 500px;
+      }
+
+      .phone {
+        width: 210px;
+      }
+
+      .phone-one {
+        top: 150px;
+      }
+
+      .section-head {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Kick Diary</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#benefits">Benefits</a>
+        <a href="#premium">Premium</a>
+        <a href="#tips">Tips</a>
+        <a href="#support">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="top">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Track kicks. Spot patterns. Share progress.</span>
+        <h1>Kick tracking that feels calm, clear, and easy to use.</h1>
+        <p>
+          Kick Diary helps families log baby kicks, review movement trends, follow meal
+          correlations, and keep a trusted diary that can sync with iCloud and be shared
+          with the people who matter most.
+        </p>
+
+        <div class="cta-row">
+          <a class="button button-primary" href="mailto:diarykick@gmail.com">Email Support</a>
+          <button class="button button-secondary" id="copy-email" type="button">Copy Support Email</button>
+        </div>
+
+        <div class="copy-status" id="copy-status" aria-live="polite"></div>
+
+        <div class="hero-meta">
+          <div class="meta-card">
+            <strong>Timeline</strong>
+            <span>Track kicks, meals, and session events in one place.</span>
+          </div>
+          <div class="meta-card">
+            <strong>Insights</strong>
+            <span>See today, yesterday, and weekly movement summaries.</span>
+          </div>
+          <div class="meta-card">
+            <strong>Support</strong>
+            <span>Need help? Reach us anytime at diarykick@gmail.com.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-preview" aria-hidden="true">
+        <div class="orb orb-one"></div>
+        <div class="orb orb-two"></div>
+        <div class="phone-stack">
+          <div class="phone phone-one">
+            <img src="site-assets/screenshots/today-home.png" alt="Kick Diary home screen showing timeline, past 7 days, and insights.">
+          </div>
+          <div class="phone phone-two">
+            <img src="site-assets/screenshots/analytics-today.png" alt="Kick Diary analytics screen showing today's overview.">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="benefits">
+      <div class="section-head">
+        <div>
+          <h2>What Kick Diary gives you</h2>
+        </div>
+        <p>
+          The app is built to make daily tracking fast while still giving you useful,
+          reassuring context around movement patterns.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="tag">Everyday tracking</span>
+          <h3>Quick logging without friction</h3>
+          <p>
+            Add kicks in a tap, log meals, or start a focused kick session when you want
+            to count movement over time.
+          </p>
+          <ul>
+            <li>Fast kick and meal buttons on the Home screen</li>
+            <li>Session mode for longer kick counting</li>
+            <li>Events timeline with kick, meal, and session activity</li>
+          </ul>
+        </article>
+
+        <article class="feature-card">
+          <span class="tag">Patterns</span>
+          <h3>See how movement changes through the day</h3>
+          <p>
+            Review Today, Yesterday, Last Week, Last Month, or custom date ranges to
+            better understand your baby’s rhythm.
+          </p>
+          <ul>
+            <li>Intraday charts and longer trend views</li>
+            <li>Overview cards for total kicks, averages, and most active periods</li>
+            <li>Hourly and daypart patterns across time</li>
+          </ul>
+        </article>
+
+        <article class="feature-card">
+          <span class="tag">Connected diary</span>
+          <h3>Keep your diary backed up and close to your support circle</h3>
+          <p>
+            iCloud sync keeps your data available across devices, and diary sharing lets
+            trusted people follow along with read-only access.
+          </p>
+          <ul>
+            <li>iCloud sync for backup and continuity</li>
+            <li>Read-only sharing for partners or caregivers</li>
+            <li>Profile switching when multiple diaries are shared with you</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div>
+          <h2>A quick look inside the app</h2>
+        </div>
+        <p>
+          These screens show the Home timeline, analytics overviews, and the insight cards
+          that help translate raw logs into something easier to understand.
+        </p>
+      </div>
+
+      <div class="screenshot-grid">
+        <article class="screenshot-card">
+          <img src="site-assets/screenshots/today-home.png" alt="Kick Diary home screen.">
+          <h3>Today at a glance</h3>
+          <p>
+            See the timeline, the past 7 days, your latest insights, and quick actions from one calm screen.
+          </p>
+        </article>
+
+        <article class="screenshot-card">
+          <img src="site-assets/screenshots/analytics-today.png" alt="Kick Diary analytics for today.">
+          <h3>Analytics for today</h3>
+          <p>
+            Compare today’s total with recent averages and see when movement was strongest.
+          </p>
+        </article>
+
+        <article class="screenshot-card">
+          <img src="site-assets/screenshots/analytics-yesterday.png" alt="Kick Diary analytics for yesterday.">
+          <h3>Yesterday in context</h3>
+          <p>
+            Review how yesterday compared with your recent baseline, including meals and quiet stretches.
+          </p>
+        </article>
+
+        <article class="screenshot-card">
+          <img src="site-assets/screenshots/insights-cards.png" alt="Kick Diary insight cards on the home screen.">
+          <h3>Readable insights</h3>
+          <p>
+            Insight cards summarize changes, highlight active times, and make patterns easier to spot.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="premium">
+      <div class="section-head">
+        <div>
+          <h2>Premium and power features</h2>
+        </div>
+        <p>
+          Kick Diary Premium unlocks the deeper review tools and sharing options that help
+          families get more from their diary over time.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="tag">Premium</span>
+          <h3>Full analytics and daily reviews</h3>
+          <p>
+            Go beyond quick totals with richer analytics for longer ranges and daily reviews
+            that help you reflect on movement patterns.
+          </p>
+          <ul>
+            <li>Today, Yesterday, Last Week, Last Month, and Last 3 Months analytics</li>
+            <li>Deeper overview cards and comparison signals</li>
+            <li>Meal correlation insights and time-of-day patterns</li>
+          </ul>
+        </article>
+
+        <article class="feature-card">
+          <span class="tag">Premium</span>
+          <h3>Sharing and export control</h3>
+          <p>
+            Premium makes it easier to keep others informed and take your data with you when
+            you need it.
+          </p>
+          <ul>
+            <li>Share a diary with trusted people using read-only access</li>
+            <li>Export a complete timeline CSV of kicks, meals, and sessions</li>
+            <li>Export a weekday analytics CSV for pattern review</li>
+          </ul>
+        </article>
+
+        <article class="feature-card">
+          <span class="tag">Premium</span>
+          <h3>Make the app feel like yours</h3>
+          <p>
+            Personal touches and convenient surfaces help Kick Diary fit better into daily life.
+          </p>
+          <ul>
+            <li>Color theme selection</li>
+            <li>Customizable app icon</li>
+            <li>Widget support for fast updates and logging from the Home Screen</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="tips">
+      <div class="section-head">
+        <div>
+          <h2>Tips for using Kick Diary</h2>
+        </div>
+        <p>
+          The app includes an in-app Tips section, and these are the core actions most people
+          use every day.
+        </p>
+      </div>
+
+      <div class="tips-grid">
+        <article class="tip-card">
+          <h3>Use the kick action button for quick logging or sessions</h3>
+          <p>
+            Tap the kick button to log a kick right away. Long press it to remove the most
+            recent kick, add a previous kick, or start a kick-counting session.
+          </p>
+          <div class="tip-ui">
+            <div class="mock-action" aria-hidden="true">
+              &#128099;
+              <span class="badge">+</span>
+            </div>
+            <p>
+              Session mode is great when you want a focused stretch of kick tracking instead
+              of one-off logging.
+            </p>
+          </div>
+        </article>
+
+        <article class="tip-card">
+          <h3>Use the meal button to log now or fix timing later</h3>
+          <p>
+            Tap the meal button to add a meal at the current time. Long press it when you
+            need to remove the last meal or add one with a custom date and time.
+          </p>
+          <div class="tip-ui">
+            <div class="mock-action" aria-hidden="true">
+              &#127860;
+              <span class="badge">+</span>
+            </div>
+            <p>
+              Meal logging helps the app surface correlations between meals and movement.
+            </p>
+          </div>
+        </article>
+
+        <article class="tip-card">
+          <h3>Switch between diaries when profiles are shared with you</h3>
+          <p>
+            If more than one diary is available, the profile switcher on the Home screen lets
+            you move between your diary and shared diaries. The current diary stays in front,
+            and read-only diaries are clearly marked.
+          </p>
+        </article>
+
+        <article class="tip-card">
+          <h3>Use the calendar button to change analytics ranges</h3>
+          <p>
+            In Analytics, use the calendar action button to switch between Today, Yesterday,
+            Last Week, Last Month, Last 3 Months, or a custom date range.
+          </p>
+          <div class="tip-ui">
+            <div class="mock-action calendar" aria-hidden="true">
+              &#128197;
+            </div>
+            <p>
+              Custom ranges are helpful when you want to review a specific stretch of time or
+              compare a memorable period.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="support">
+      <div class="section-head">
+        <div>
+          <h2>Need help?</h2>
+        </div>
+        <p>
+          For support, questions, or feedback, contact the Kick Diary team directly by email.
+        </p>
+      </div>
+
+      <div class="support-layout">
+        <div class="support-box">
+          <h3>Contact support</h3>
+          <p>
+            The fastest way to get help is to email us with a short description of what you’re
+            seeing and which part of the app you were using.
+          </p>
+          <div class="support-email">diarykick@gmail.com</div>
+          <div class="support-actions">
+            <a class="button button-primary" href="mailto:diarykick@gmail.com">Open Email App</a>
+            <button class="button button-secondary" id="copy-email-secondary" type="button">Copy Email Address</button>
+          </div>
+          <div class="copy-status" id="copy-status-secondary" aria-live="polite"></div>
+        </div>
+
+        <div class="support-list">
+          <article class="support-card">
+            <h3><span aria-hidden="true">&#128172;</span> What to include</h3>
+            <p>
+              Tell us what you were trying to do, what happened instead, and whether the issue
+              was on Home, Analytics, Settings, widgets, sharing, or export.
+            </p>
+          </article>
+
+          <article class="support-card">
+            <h3><span aria-hidden="true">&#128248;</span> Screenshots help</h3>
+            <p>
+              If something looks wrong, include a screenshot. It helps us understand layout,
+              button state, and the exact screen you were on.
+            </p>
+          </article>
+
+          <article class="support-card">
+            <h3><span aria-hidden="true">&#128274;</span> Sharing and sync questions</h3>
+            <p>
+              If your question is about iCloud sync, shared diaries, or exports, mention that in
+              the subject line so we can point you to the right fix faster.
+            </p>
+            <small>Support email: diarykick@gmail.com</small>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Kick Diary support and product overview</span>
+      <span>Email: <a href="mailto:diarykick@gmail.com">diarykick@gmail.com</a></span>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const email = "diarykick@gmail.com";
+
+      function wireCopy(buttonId, statusId) {
+        const button = document.getElementById(buttonId);
+        const status = document.getElementById(statusId);
+        if (!button || !status) return;
+
+        button.addEventListener("click", async function () {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(email);
+            } else {
+              const input = document.createElement("input");
+              input.value = email;
+              document.body.appendChild(input);
+              input.select();
+              document.execCommand("copy");
+              document.body.removeChild(input);
+            }
+
+            status.textContent = "Copied diarykick@gmail.com";
+            window.setTimeout(function () {
+              status.textContent = "";
+            }, 2200);
+          } catch (error) {
+            status.textContent = "Copy failed. Please email diarykick@gmail.com manually.";
+          }
+        });
+      }
+
+      wireCopy("copy-email", "copy-status");
+      wireCopy("copy-email-secondary", "copy-status-secondary");
+    }());
+  </script>
+</body>
+</html>
